@@ -77,7 +77,22 @@ app.MapGet("get-secret", async (
     }
 
     return Results.Ok(getSecretValueResponse.SecretString);
-    
+
+});
+
+app.MapPut("update-secret-value", async (
+    [FromServices] IAmazonSecretsManager _amazonSecretsManager,
+    [FromBody] UpdateSecretValueModel updateSecretValueModel) =>
+{
+    var putSecretValueRequest = new PutSecretValueRequest()
+    {
+        SecretId = updateSecretValueModel.SecretName,
+        SecretString = updateSecretValueModel.Value
+    };
+
+    var putSecretValueResponse = await _amazonSecretsManager.PutSecretValueAsync(putSecretValueRequest);
+
+    return Results.Ok(putSecretValueResponse);
 });
 
 
@@ -86,3 +101,4 @@ app.Run();
 
 
 internal record CreateSecretModel(string SecretName, string Value, string Description);
+internal record UpdateSecretValueModel(string SecretName, string Value);
