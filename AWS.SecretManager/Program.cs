@@ -121,8 +121,29 @@ app.MapGet("describe-secret", async (
         return Results.BadRequest(result.ErrorMessage);
 
     return Results.Ok(result.DescribeSecretResponse);
+});
+
+app.MapDelete("delete-secret", async (
+    [FromServices] IAmazonSecretsManager _amazonSecretsManager,
+    [FromQuery] string secretName) =>
+{
+    var result = await GetDescribeIsExistsSecret(_amazonSecretsManager, secretName);
+
+    if (result.DescribeSecretResponse is null)
+        return Results.BadRequest(result.ErrorMessage);
+
+
+    var deleteSecretRequest = new DeleteSecretRequest()
+    {
+        SecretId = secretName
+    };
+
+    var deleteSecretResponse = await _amazonSecretsManager.DeleteSecretAsync(deleteSecretRequest);
+
+    return Results.Ok(deleteSecretResponse);
 
 });
+
 app.Run();
 async static Task<GetDescribeIsExistSecretModel> GetDescribeIsExistsSecret(
     IAmazonSecretsManager amazonSecretManager,
@@ -137,12 +158,11 @@ async static Task<GetDescribeIsExistSecretModel> GetDescribeIsExistsSecret(
 
     try
     {
-    var describeSecretRequest = new DescribeSecretRequest()
-    {
-        SecretId = secretName
-    };
+        var describeSecretRequest = new DescribeSecretRequest()
+        {
+            SecretId = secretName
+        };
 
-    var describeSecretResponse = await _amazonSecretsManager.DescribeSecretAsync(describeSecretRequest);
 
         describeSecretResponse = await amazonSecretManager.DescribeSecretAsync(describeSecretRequest);
 
