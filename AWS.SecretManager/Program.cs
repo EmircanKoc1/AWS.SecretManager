@@ -57,6 +57,31 @@ app.MapPost("create-secret", async (
 });
 
 
+app.MapGet("get-secret", async (
+    [FromServices] IAmazonSecretsManager _amazonSecretsManager,
+    [FromQuery] string secretName) =>
+{
+    var getSecretValueRequest = new GetSecretValueRequest()
+    {
+        SecretId = secretName
+    };
+    GetSecretValueResponse getSecretValueResponse = default;
+
+    try
+    {
+        getSecretValueResponse = await _amazonSecretsManager.GetSecretValueAsync(getSecretValueRequest);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+
+    return Results.Ok(getSecretValueResponse.SecretString);
+    
+});
+
+
+
 app.Run();
 
 
