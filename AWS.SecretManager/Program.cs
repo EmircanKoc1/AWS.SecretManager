@@ -99,7 +99,14 @@ app.MapGet("describe-secret", async (
     [FromServices] IAmazonSecretsManager _amazonSecretsManager,
     [FromQuery] string secretName) =>
 {
+    var result = await GetDescribeIsExistsSecret(_amazonSecretsManager, secretName);
 
+    if (result.DescribeSecretResponse is null)
+        return Results.BadRequest(result.ErrorMessage);
+
+    return Results.Ok(result.DescribeSecretResponse);
+
+});
 async static Task<GetDescribeIsExistSecretModel> GetDescribeIsExistsSecret(
     IAmazonSecretsManager amazonSecretManager,
     string secretName)
