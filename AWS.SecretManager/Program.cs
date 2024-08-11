@@ -95,7 +95,21 @@ app.MapPut("update-secret-value", async (
     return Results.Ok(putSecretValueResponse);
 });
 
+app.MapGet("describe-secret", async (
+    [FromServices] IAmazonSecretsManager _amazonSecretsManager,
+    [FromQuery] string secretName) =>
+{
+    var describeSecretRequest = new DescribeSecretRequest()
+    {
+        SecretId = secretName
+    };
 
+    var describeSecretResponse = await _amazonSecretsManager.DescribeSecretAsync(describeSecretRequest);
+
+
+    return Results.Ok(describeSecretResponse);
+
+});
 
 app.Run();
 
