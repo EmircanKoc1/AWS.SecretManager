@@ -19,6 +19,22 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapGet("list-secretsmanagers", async (
+    [FromServices] IAmazonSecretsManager _amazonSecretsManager,
+    [FromQuery] int maxResults) =>
+{
+    var listSecretsRequest = new ListSecretsRequest()
+    {
+        MaxResults = maxResults
+    };
+
+    return Results.Ok(await _amazonSecretsManager.ListSecretsAsync(listSecretsRequest));
+
+});
+
+
+
+
 
 app.Run();
 
