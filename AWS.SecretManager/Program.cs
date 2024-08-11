@@ -39,6 +39,11 @@ app.MapPost("create-secret", async (
     [FromServices] IAmazonSecretsManager _amazonSecretsManager,
     [FromBody] CreateSecretModel secretModel) =>
 {
+    var result = await GetDescribeIsExistsSecret(_amazonSecretsManager, secretModel.SecretName);
+
+    if (result.DescribeSecretResponse is not null)
+        return Results.BadRequest("secret already defined");
+
     var createSecretRequest = new CreateSecretRequest()
     {
         Description = secretModel.Description,
