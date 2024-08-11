@@ -95,6 +95,11 @@ app.MapPut("update-secret-value", async (
     [FromServices] IAmazonSecretsManager _amazonSecretsManager,
     [FromBody] UpdateSecretValueModel updateSecretValueModel) =>
 {
+    var result = await GetDescribeIsExistsSecret(_amazonSecretsManager, updateSecretValueModel.SecretName);
+
+    if (result.DescribeSecretResponse is null)
+        return Results.BadRequest(result.ErrorMessage);
+
     var putSecretValueRequest = new PutSecretValueRequest()
     {
         SecretId = updateSecretValueModel.SecretName,
