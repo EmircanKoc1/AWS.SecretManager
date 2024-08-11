@@ -1,4 +1,6 @@
 using Amazon.SecretsManager;
+using Amazon.SecretsManager.Model;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,8 +35,29 @@ app.MapGet("list-secretsmanagers", async (
 });
 
 
+app.MapPost("create-secret", async (
+    [FromServices] IAmazonSecretsManager _amazonSecretsManager,
+    [FromBody] CreateSecretModel secretModel) =>
+{
+    var createSecretRequest = new CreateSecretRequest()
+    {
+        Description = secretModel.Description,
+        Name = secretModel.SecretName,
+        SecretString = secretModel.Value
 
+    };
+
+    var createSecretResponse = await _amazonSecretsManager.CreateSecretAsync(createSecretRequest);
+
+    if (createSecretResponse.HttpStatusCode is System.Net.HttpStatusCode.OK)
+        return Results.Ok(createSecretResponse);
+
+    return Results.BadRequest("secrets not created");
+
+});
 
 
 app.Run();
 
+
+internal record CreateSecretModel(string SecretName, string Value, string Description);
