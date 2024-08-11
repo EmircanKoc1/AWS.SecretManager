@@ -30,7 +30,7 @@ app.MapGet("list-secretsmanagers", async (
         MaxResults = maxResults
     };
 
-    return Results.Ok(await _amazonSecretsManager.ListSecretsAsync(listSecretsRequest));
+    return Results.Ok((await _amazonSecretsManager.ListSecretsAsync(listSecretsRequest)).SecretList);
 
 });
 
