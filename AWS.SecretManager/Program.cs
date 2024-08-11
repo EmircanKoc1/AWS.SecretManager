@@ -123,6 +123,7 @@ app.MapGet("describe-secret", async (
     return Results.Ok(result.DescribeSecretResponse);
 
 });
+app.Run();
 async static Task<GetDescribeIsExistSecretModel> GetDescribeIsExistsSecret(
     IAmazonSecretsManager amazonSecretManager,
     string secretName)
