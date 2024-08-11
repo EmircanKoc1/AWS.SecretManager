@@ -99,6 +99,20 @@ app.MapGet("describe-secret", async (
     [FromServices] IAmazonSecretsManager _amazonSecretsManager,
     [FromQuery] string secretName) =>
 {
+
+async static Task<GetDescribeIsExistSecretModel> GetDescribeIsExistsSecret(
+    IAmazonSecretsManager amazonSecretManager,
+    string secretName)
+{
+
+    DescribeSecretResponse? describeSecretResponse = default;
+    GetDescribeIsExistSecretModel? getDescribeIsExistSecretModel = default;
+
+    if (string.IsNullOrWhiteSpace(secretName))
+        return new GetDescribeIsExistSecretModel(describeSecretResponse, "secret name is null");
+
+    try
+    {
     var describeSecretRequest = new DescribeSecretRequest()
     {
         SecretId = secretName
@@ -106,13 +120,23 @@ app.MapGet("describe-secret", async (
 
     var describeSecretResponse = await _amazonSecretsManager.DescribeSecretAsync(describeSecretRequest);
 
+        describeSecretResponse = await amazonSecretManager.DescribeSecretAsync(describeSecretRequest);
 
-    return Results.Ok(describeSecretResponse);
+    }
+    catch (ResourceNotFoundException)
+    {
+        return new GetDescribeIsExistSecretModel(describeSecretResponse, "secret not found");
 
-});
+    }
+    catch (Exception ex)
+    {
+        return new GetDescribeIsExistSecretModel(describeSecretResponse, ex.Message);
+    }
 
-app.Run();
+    return new GetDescribeIsExistSecretModel(describeSecretResponse, string.Empty);
 
+}
 
+internal record GetDescribeIsExistSecretModel(DescribeSecretResponse? DescribeSecretResponse, string ErrorMessage);
 internal record CreateSecretModel(string SecretName, string Value, string Description);
 internal record UpdateSecretValueModel(string SecretName, string Value);
